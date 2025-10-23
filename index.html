@@ -6,34 +6,88 @@
   <title>CozyChat</title>
   <script src="https://cdn.ably.io/lib/ably.min-1.js"></script>
   <style>
+    :root {
+      --bg: #1e1e2f;
+      --card: #2e2e3e;
+      --accent: #6c63ff;
+      --text: #f0f0f0;
+      --input: #3e3e4e;
+    }
+
     body {
-      font-family: sans-serif;
-      background: #f4f4f4;
       margin: 0;
-      padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
     }
+
     #login, #chat {
+      width: 100%;
       max-width: 500px;
-      margin: 50px auto;
+      background-color: var(--card);
       padding: 20px;
-      background: white;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.3);
     }
+
+    h2 {
+      text-align: center;
+      color: var(--accent);
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 12px;
+      border: none;
+      border-radius: 8px;
+      background-color: var(--input);
+      color: var(--text);
+      font-size: 16px;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
     #chat { display: none; }
+
     #messages {
       height: 300px;
       overflow-y: auto;
-      border: 1px solid #ccc;
+      background-color: var(--input);
       padding: 10px;
+      border-radius: 8px;
       margin-bottom: 10px;
-      background: #fafafa;
     }
+
     .message {
+      background-color: var(--card);
+      padding: 8px 12px;
+      border-radius: 10px;
       margin-bottom: 8px;
+      word-wrap: break-word;
     }
+
     .username {
       font-weight: bold;
+      color: var(--accent);
+    }
+
+    #error {
+      color: #ff6b6b;
+      text-align: center;
     }
   </style>
 </head>
@@ -41,10 +95,10 @@
 
 <div id="login">
   <h2>Enter CozyChat</h2>
-  <input type="text" id="username" placeholder="Username" /><br/><br/>
-  <input type="password" id="passcode" placeholder="Enter code" /><br/><br/>
+  <input type="text" id="username" placeholder="Username" />
+  <input type="password" id="passcode" placeholder="Enter code" />
   <button onclick="enterChat()">Enter</button>
-  <p id="error" style="color:red;"></p>
+  <p id="error"></p>
 </div>
 
 <div id="chat">
@@ -95,4 +149,3 @@
 
 </body>
 </html>
-
