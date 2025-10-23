@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Cozy Chat Room</title>
+  <title>CozyChat</title>
+  <script src="https://cdn.ably.io/lib/ably.min-1.js"></script>
   <style>
     body {
       font-family: sans-serif;
@@ -39,7 +40,7 @@
 <body>
 
 <div id="login">
-  <h2>Enter Chat Room</h2>
+  <h2>Enter CozyChat</h2>
   <input type="text" id="username" placeholder="Username" /><br/><br/>
   <input type="password" id="passcode" placeholder="Enter code" /><br/><br/>
   <button onclick="enterChat()">Enter</button>
@@ -47,14 +48,17 @@
 </div>
 
 <div id="chat">
-  <h2>Cozy Chat Room</h2>
+  <h2>CozyChat Room</h2>
   <div id="messages"></div>
   <input type="text" id="messageInput" placeholder="Type a message..." />
   <button onclick="sendMessage()">Send</button>
 </div>
 
 <script>
+  const ABLY_API_KEY = "XuRoJw.vnfTcA:XYM77H_IW3dy6o9IrqsFm-AxezRCG8720wGCdEqQ3lM";
   let username = "";
+  let ably;
+  let channel;
 
   function enterChat() {
     const code = document.getElementById("passcode").value;
@@ -62,6 +66,17 @@
     if (code === "talk123" && username) {
       document.getElementById("login").style.display = "none";
       document.getElementById("chat").style.display = "block";
+
+      ably = new Ably.Realtime(ABLY_API_KEY);
+      channel = ably.channels.get("cozy-chat");
+
+      channel.subscribe("message", function(msg) {
+        const msgDiv = document.createElement("div");
+        msgDiv.className = "message";
+        msgDiv.innerHTML = `<span class="username">${msg.data.username}:</span> ${msg.data.text}`;
+        document.getElementById("messages").appendChild(msgDiv);
+        document.getElementById("messages").scrollTop = document.getElementById("messages").scrollHeight;
+      });
     } else {
       document.getElementById("error").textContent = "Invalid code or missing username.";
     }
@@ -70,11 +85,8 @@
   function sendMessage() {
     const input = document.getElementById("messageInput");
     const text = input.value.trim();
-    if (text) {
-      const msgDiv = document.createElement("div");
-      msgDiv.className = "message";
-      msgDiv.innerHTML = `<span class="username">${username}:</span> ${text}`;
-      document.getElementById("messages").appendChild(msgDiv);
+    if (text && channel) {
+      channel.publish("message", { username, text });
       input.value = "";
       input.focus();
     }
@@ -83,3 +95,4 @@
 
 </body>
 </html>
+
