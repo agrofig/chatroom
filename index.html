@@ -6,52 +6,55 @@
   <title>CozyChat</title>
   <script src="https://cdn.ably.io/lib/ably.min-1.js"></script>
   <style>
-    :root {
-      --bg-light: #f4f4f4;
-      --card-light: #ffffff;
-      --text-light: #222;
-      --input-light: #e0e0e0;
-
-      --bg-dark: #1e1e2f;
-      --card-dark: #2e2e3e;
-      --text-dark: #f0f0f0;
-      --input-dark: #3e3e4e;
-
-      --accent: #6c63ff;
-    }
-
     body {
       margin: 0;
       font-family: 'Segoe UI', sans-serif;
+      background-color: #f4f4f4;
+      color: #222;
       display: flex;
       height: 100vh;
-      transition: background 0.3s, color 0.3s;
     }
 
-    .light {
-      --bg: var(--bg-light);
-      --card: var(--card-light);
-      --text: var(--text-light);
-      --input: var(--input-light);
+    #usernameScreen {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
     }
 
-    .dark {
-      --bg: var(--bg-dark);
-      --card: var(--card-dark);
-      --text: var(--text-dark);
-      --input: var(--input-dark);
+    #usernameScreen input {
+      padding: 12px;
+      font-size: 18px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
     }
 
-    body {
-      background-color: var(--bg);
-      color: var(--text);
+    #usernameScreen button {
+      padding: 12px;
+      font-size: 18px;
+      background-color: #6c63ff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    #app {
+      display: flex;
+      width: 100%;
+      height: 100%;
     }
 
     #sidebar {
       width: 250px;
-      background-color: var(--card);
+      background-color: #fff;
+      border-right: 1px solid #ddd;
       padding: 20px;
-      box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+      box-sizing: border-box;
       display: flex;
       flex-direction: column;
     }
@@ -65,7 +68,7 @@
     .roomItem {
       padding: 10px;
       margin-bottom: 8px;
-      background-color: var(--input);
+      background-color: #eee;
       border-radius: 6px;
       cursor: pointer;
     }
@@ -75,19 +78,20 @@
       padding: 30px;
       display: flex;
       flex-direction: column;
+      box-sizing: border-box;
     }
 
     #messages {
       flex-grow: 1;
       overflow-y: auto;
-      background-color: var(--input);
+      background-color: #e0e0e0;
       padding: 15px;
       border-radius: 8px;
       margin-bottom: 20px;
     }
 
     .message {
-      background-color: var(--card);
+      background-color: #fff;
       padding: 10px 14px;
       border-radius: 10px;
       margin-bottom: 10px;
@@ -95,35 +99,25 @@
 
     .username {
       font-weight: bold;
-      color: var(--accent);
+      color: #6c63ff;
     }
 
-    input, button, select {
+    input, select {
       padding: 12px;
       font-size: 16px;
-      border: none;
+      border: 1px solid #ccc;
       border-radius: 8px;
       margin-bottom: 10px;
-      background-color: var(--input);
-      color: var(--text);
     }
 
     button {
-      background-color: var(--accent);
+      padding: 12px;
+      font-size: 16px;
+      background-color: #6c63ff;
       color: white;
+      border: none;
+      border-radius: 8px;
       cursor: pointer;
-    }
-
-    #topBar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    #themeToggle {
-      background-color: var(--input);
-      color: var(--text);
-      border: 1px solid var(--accent);
     }
 
     #roomForm {
@@ -132,40 +126,42 @@
       margin-top: 20px;
     }
 
-    #roomTitle {
+    #roomHeader {
       font-size: 20px;
       margin-bottom: 10px;
     }
   </style>
 </head>
-<body class="dark">
+<body>
 
-<div id="sidebar">
-  <button onclick="toggleTheme()" id="themeToggle">Toggle Theme</button>
-  <button onclick="showRoomForm()">➕ Add Room</button>
-  <div id="roomForm">
-    <div id="roomTitle">Create or Join Room</div>
-    <select id="roomMode">
-      <option value="create">Create</option>
-      <option value="join">Join</option>
-    </select>
-    <input type="text" id="roomName" placeholder="Room name" />
-    <input type="password" id="roomPassword" placeholder="Room password (optional)" />
-    <button onclick="enterRoom()">Enter</button>
-    <p id="roomError" style="color:#ff6b6b;"></p>
-  </div>
-  <div id="roomList"></div>
+<div id="usernameScreen">
+  <h2>Welcome to CozyChat</h2>
+  <input type="text" id="usernameInput" placeholder="Enter your username" />
+  <button onclick="setUsername()">Enter</button>
 </div>
 
-<div id="main">
-  <div id="topBar">
-    <h2 id="roomHeader">Welcome to CozyChat</h2>
-    <input type="text" id="username" placeholder="Enter your username" />
-    <button onclick="setUsername()">Set Username</button>
+<div id="app" style="display:none;">
+  <div id="sidebar">
+    <button onclick="toggleRoomForm()">➕ Add Room</button>
+    <div id="roomForm">
+      <select id="roomMode">
+        <option value="create">Create</option>
+        <option value="join">Join</option>
+      </select>
+      <input type="text" id="roomName" placeholder="Room name" />
+      <input type="password" id="roomPassword" placeholder="Room password (optional)" />
+      <button onclick="enterRoom()">Enter Room</button>
+      <p id="roomError" style="color:#ff6b6b;"></p>
+    </div>
+    <div id="roomList"></div>
   </div>
-  <div id="messages"></div>
-  <input type="text" id="messageInput" placeholder="Type a message..." />
-  <button onclick="sendMessage()">Send</button>
+
+  <div id="main">
+    <div id="roomHeader">Select a room</div>
+    <div id="messages"></div>
+    <input type="text" id="messageInput" placeholder="Type a message..." />
+    <button onclick="sendMessage()">Send</button>
+  </div>
 </div>
 
 <script>
@@ -178,21 +174,18 @@
   const joinedRooms = [];
 
   function setUsername() {
-    const name = document.getElementById("username").value.trim();
+    const name = document.getElementById("usernameInput").value.trim();
     if (name) {
       username = name;
       ably = new Ably.Realtime(ABLY_API_KEY);
-      document.getElementById("username").disabled = true;
+      document.getElementById("usernameScreen").style.display = "none";
+      document.getElementById("app").style.display = "flex";
     }
   }
 
-  function toggleTheme() {
-    document.body.classList.toggle("dark");
-    document.body.classList.toggle("light");
-  }
-
-  function showRoomForm() {
-    document.getElementById("roomForm").style.display = "flex";
+  function toggleRoomForm() {
+    const form = document.getElementById("roomForm");
+    form.style.display = form.style.display === "none" ? "flex" : "none";
   }
 
   function enterRoom() {
@@ -260,4 +253,3 @@
 
 </body>
 </html>
-
