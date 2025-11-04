@@ -38,7 +38,7 @@
       margin-bottom: 20px;
     }
 
-    input {
+    input, select {
       width: 100%;
       padding: 14px;
       margin-bottom: 16px;
@@ -113,10 +113,15 @@
 </div>
 
 <div id="roomSelect" style="display:none;">
-  <h2>Join or Create a Chatroom</h2>
+  <h2>Create or Join a Chatroom</h2>
+  <select id="roomMode">
+    <option value="create">Create Room</option>
+    <option value="join">Join Room</option>
+  </select>
   <input type="text" id="roomName" placeholder="Room name" />
   <input type="password" id="roomPassword" placeholder="Room password (optional)" />
-  <button onclick="joinRoom()">Enter Room</button>
+  <button onclick="enterRoom()">Enter Room</button>
+  <p id="roomError"></p>
 </div>
 
 <div id="chat">
@@ -125,6 +130,7 @@
   <div id="messages"></div>
   <input type="text" id="messageInput" placeholder="Type a message..." />
   <button onclick="sendMessage()">Send</button>
+  <button onclick="switchRoom()">Switch Room</button>
 </div>
 
 <script>
@@ -146,26 +152,35 @@
     }
   }
 
-  function joinRoom() {
+  function enterRoom() {
     const room = document.getElementById("roomName").value.trim();
     const password = document.getElementById("roomPassword").value;
+    const mode = document.getElementById("roomMode").value;
 
     if (!room) {
-      alert("Room name is required.");
+      document.getElementById("roomError").textContent = "Room name is required.";
       return;
     }
 
-    if (roomPasswords[room] && roomPasswords[room] !== password) {
-      alert("Incorrect password for this room.");
-      return;
+    if (mode === "create") {
+      roomPasswords[room] = password;
+    } else if (mode === "join") {
+      if (roomPasswords[room] && roomPasswords[room] !== password) {
+        document.getElementById("roomError").textContent = "Incorrect password for this room.";
+        return;
+      }
     }
 
-    roomPasswords[room] = password;
     currentRoom = room;
     document.getElementById("roomSelect").style.display = "none";
     document.getElementById("chat").style.display = "block";
     document.getElementById("roomNameDisplay").textContent = `Room: ${room}`;
     document.getElementById("messages").innerHTML = "";
+    document.getElementById("roomError").textContent = "";
+
+    if (channel) {
+      channel.unsubscribe();
+    }
 
     channel = ably.channels.get(room);
     channel.subscribe("message", function(msg) {
@@ -184,6 +199,14 @@
       channel.publish("message", { username, text });
       input.value = "";
       input.focus();
+    }
+  }
+
+  function switchRoom() {
+    document.getElementById("chat").style.display = "none";
+    document.getElementById("roomSelect").style.display = "block";
+    if (channel) {
+      channel.unsubscribe();
     }
   }
 </script>
